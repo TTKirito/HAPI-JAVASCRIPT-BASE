@@ -1,0 +1,39 @@
+stages:
+  - test-lint
+  # - deploy
+
+eslint-test:
+  stage: test-lint
+  image: node:8
+  except:
+    - master
+    - dev
+  before_script:
+    - rm -rf /tmp/*
+    - npm i --no-cache
+  script:
+    - npm run watch:lint
+
+# deploy:
+#   stage: deploy
+#   image: gitlab/dind:latest
+#   only:
+#     - dev
+#   before_script:
+#     - mkdir -p ~/.ssh
+#     - echo "$SSH_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/id_rsa
+#     - chmod 600 ~/.ssh/id_rsa
+#     - eval "$(ssh-agent -s)"
+#     - ssh-add ~/.ssh/id_rsa
+#     - ssh-keyscan -H $DEPLOYMENT_SERVER_IP >> ~/.ssh/known_hosts
+#   script:
+#     - rm -rf /tmp/*
+#     - rm -rf .git
+#     - rsync -az $(pwd) ${DEPLOYMENT_SERVER_USER}@${DEPLOYMENT_SERVER_IP}:${DEPLOYMENT_SERVER_ROOT}
+#     - >
+#       ssh ${DEPLOYMENT_SERVER_USER}@${DEPLOYMENT_SERVER_IP} "cd ${DEPLOYMENT_SERVER_DIR};
+#       cp .env.development .env;
+#       yarn install;
+#       yarn build;
+#       yarn knex migrate:latest;
+#       pm2 reload processes.json"
